@@ -1,0 +1,54 @@
+# .env 파일에서 환경 변수 로드
+services:
+  # MongoDB 서비스
+  mk_mongodb:
+    image: mongo:latest
+    container_name: markitdown-mongodb
+    restart: always
+    volumes:
+      - mongodb_data:/data/db
+    ports:
+      - "${DOCKER_MONGODB_PORT:-27018}:27017"
+    networks:
+      - markitdown-network
+
+  # 백엔드 서비스
+  mk_backend:
+    image: markitdown-backend:latest
+    container_name: markitdown-backend
+    restart: always
+    volumes:
+      - ./uploads:/app/uploads
+    ports:
+      - "${DOCKER_BACKEND_PORT:-5001}:${PORT:-5000}"
+    depends_on:
+      - mk_mongodb
+    env_file:
+      - .env
+    environment:
+      - MONGODB_URI=mongodb://mk_mongodb:27017/markitdown
+    networks:
+      - markitdown-network
+
+  # 프론트엔드 서비스
+  mk_frontend:
+    image: markitdown-frontend:latest
+    container_name: markitdown-frontend
+    restart: always
+    ports:
+      - "${DOCKER_FRONTEND_PORT:-3002}:80"
+    depends_on:
+      - mk_backend
+    networks:
+      - markitdown-network
+
+# 네트워크 정의
+networks:
+  markitdown-network:
+    external: true
+    name: npm-network
+    driver: bridge
+
+# 볼륨 정의
+volumes:
+  mongodb_data:

@@ -1,0 +1,17 @@
+version: '3.8'
+
+# 빌드 서비스 정의
+services:
+  # 백엔드 빌드
+  mk_backend_build:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: markitdown-backend:latest
+
+  # 프론트엔드 빌드
+  mk_frontend_build:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: markitdown-frontend:latest
