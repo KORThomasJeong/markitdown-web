@@ -32,7 +32,7 @@
 1. 저장소를 클론합니다:
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/KORThomasJeong/markitdown-web.git
 cd markitdown-web
 ```
 
@@ -62,8 +62,12 @@ docker-compose up
 - 프론트엔드 웹 서버 (포트 3000)
 
 4. markitdown-api 서비스가 실행 중인지 확인합니다. 이 서비스는 문서 변환 기능을 제공하는 별도의 API 서비스입니다.
+   아래 링크의 API를 docker로 설치 하세요!
+   ```
+   https://github.com/9bow/markitdown-api-fly-io?utm_source=pytorchkr&ref=pytorchkr
+   ```
 
-3. 브라우저에서 다음 URL로 접속합니다:
+6. 브라우저에서 다음 URL로 접속합니다:
 
 ```
 http://localhost:3000
