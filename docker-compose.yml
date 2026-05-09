@@ -46,7 +46,7 @@ services:
 networks:
   markitdown-network:
     external: true
-    name: npm-network
+    name: docker_default
     driver: bridge
 
 # 볼륨 정의

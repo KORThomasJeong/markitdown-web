@@ -20,7 +20,7 @@
 - **변환 기록 저장**: 모든 변환 결과는 데이터베이스에 저장되며, 원본 파일은 서버에 저장
 - **최신 UI/UX**: Tailwind CSS와 React를 사용하여 모던하고 반응형 인터페이스 구현
 
-## Docker를 사용한 실행 방법
+## Docker를 사용한 빌드 및 실행 방법
 
 ### 사전 요구사항
 
@@ -43,6 +43,9 @@ cd markitdown-web
      - `JWT_SECRET`: 인증에 사용되는 JWT 시크릿 키
      - `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_NAME`: 관리자 계정 정보
      - `SERVER_URL`: 서버 URL
+     - `DOCKER_MONGODB_PORT`: MongoDB 포트 (기본값: 27018)
+     - `DOCKER_BACKEND_PORT`: 백엔드 포트 (기본값: 5001)
+     - `DOCKER_FRONTEND_PORT`: 프론트엔드 포트 (기본값: 3002)
 
 ```bash
 cp .env.example .env
@@ -50,35 +53,61 @@ cp backend/.env.example backend/.env
 # 필요한 환경 변수 값을 수정하세요
 ```
 
-3. Docker Compose를 사용하여 애플리케이션을 실행합니다:
+3. Docker 네트워크 생성:
 
 ```bash
-docker-compose up
+docker network create npm-network
+```
+
+### Docker 이미지 빌드
+
+Docker 이미지를 빌드하려면 다음 명령어를 사용합니다:
+
+```bash
+docker-compose -f docker-compose.build.yml build
+```
+
+이 명령어는 다음 이미지를 빌드합니다:
+- `markitdown-backend:latest` - 백엔드 API 서버
+- `markitdown-frontend:latest` - 프론트엔드 웹 서버
+
+**특정 서비스만 빌드하기:**
+```bash
+# 백엔드만 빌드
+docker-compose -f docker-compose.build.yml build mk_backend_build
+
+# 프론트엔드만 빌드
+docker-compose -f docker-compose.build.yml build mk_frontend_build
+```
+
+### 애플리케이션 실행
+
+빌드된 이미지를 사용하여 애플리케이션을 실행합니다:
+
+```bash
+docker-compose up -d
+```
+
+**빌드와 실행을 한 번에:**
+```bash
+docker-compose -f docker-compose.build.yml build && docker-compose up -d
 ```
 
 이 명령어는 다음 서비스를 실행합니다:
-- MongoDB 데이터베이스 (포트 27017)
-- 백엔드 API 서버 (포트 5000)
-- 프론트엔드 웹 서버 (포트 3000)
+- MongoDB 데이터베이스 (포트 27018 → 컨테이너 내부 27017)
+- 백엔드 API 서버 (포트 5001 → 컨테이너 내부 5000)
+- 프론트엔드 웹 서버 (포트 3002 → 컨테이너 내부 80)
 
 4. markitdown-api 서비스가 실행 중인지 확인합니다. 이 서비스는 문서 변환 기능을 제공하는 별도의 API 서비스입니다.
-   아래 링크의 API를 docker로 설치 하세요!
+   아래 링크의 API를 docker로 설치하세요:
    ```
    https://github.com/9bow/markitdown-api-fly-io?utm_source=pytorchkr&ref=pytorchkr
    ```
 
-6. 브라우저에서 다음 URL로 접속합니다:
+5. 브라우저에서 다음 URL로 접속합니다:
 
 ```
-http://localhost:3000
-```
-
-### 백그라운드에서 실행
-
-백그라운드에서 애플리케이션을 실행하려면 다음 명령어를 사용합니다:
-
-```bash
-docker-compose up -d
+http://localhost:3002
 ```
 
 ### 애플리케이션 중지
@@ -93,6 +122,21 @@ docker-compose down
 
 ```bash
 docker-compose down -v
+```
+
+### 이미지 재빌드
+
+코드 변경 후 이미지를 재빌드하려면:
+
+```bash
+# 캐시 없이 강제 재빌드
+docker-compose -f docker-compose.build.yml build --no-cache
+
+# 특정 서비스만 재빌드
+docker-compose -f docker-compose.build.yml build --no-cache mk_backend_build
+
+# 재빌드 후 재시작
+docker-compose -f docker-compose.build.yml build && docker-compose up -d --force-recreate
 ```
 
 ## 애플리케이션 사용 방법
